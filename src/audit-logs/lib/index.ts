@@ -2,6 +2,7 @@ import path from 'path'
 
 import { readCompressedJsonFileFallback } from '@/frame/lib/read-json-file'
 import { getOpenApiVersion } from '@/versions/lib/all-versions'
+import { supported as supportedGhesReleases } from '@/versions/lib/enterprise-server-releases'
 import findPage from '@/frame/lib/find-page'
 import type { Context, Page } from '@/types'
 import type {
@@ -158,12 +159,12 @@ export function getAuditLogEvents(page: string, version: string): AuditLogEventT
     auditLogEventsCache.get(openApiVersion)?.set(page, [])
     auditLogEventsCache
       .get(openApiVersion)
-      ?.set(page, readCompressedJsonFileFallback(auditLogFileName))
+      ?.set(page, readCompressedJsonFileFallback(auditLogFileName) as AuditLogEventT[])
   } else if (!auditLogEventsCache.get(openApiVersion)?.has(page)) {
     auditLogEventsCache.get(openApiVersion)?.set(page, [])
     auditLogEventsCache
       .get(openApiVersion)
-      ?.set(page, readCompressedJsonFileFallback(auditLogFileName))
+      ?.set(page, readCompressedJsonFileFallback(auditLogFileName) as AuditLogEventT[])
   }
 
   const auditLogEvents = auditLogEventsCache.get(openApiVersion)?.get(page)
@@ -300,6 +301,7 @@ export async function filterAndUpdateGhesDataByAllowlistValues({
   auditLogPage,
   titleContext,
   globalFields = [],
+  supportedGhesVersions = supportedGhesReleases,
 }: {
   eventsToCheck: RawAuditLogEventT[]
   allowListValue: string
@@ -308,8 +310,16 @@ export async function filterAndUpdateGhesDataByAllowlistValues({
   auditLogPage: string
   titleContext?: TitleResolutionContext
   globalFields?: string[]
+  supportedGhesVersions?: string[]
 }) {
   if (!currentGhesEvents) currentGhesEvents = {}
+
+  // Upstream `audit-log-allowlists/data/schema.json` lags docs's deprecation
+  // schedule, so events still list `ghes` keys for versions we've already
+  // dropped from `supported` in `enterprise-server-releases.ts`. Without this
+  // filter, the nightly sync would re-add `src/audit-logs/data/ghes-X.Y/`
+  // dirs for those deprecated versions. See docs-engineering#6562.
+  const supportedGhesVersionSet = new Set(supportedGhesVersions)
 
   const seenByGhesVersion = new Map()
   for (const [ghesVersion, events] of Object.entries(currentGhesEvents)) {
@@ -320,6 +330,7 @@ export async function filterAndUpdateGhesDataByAllowlistValues({
 
   for (const event of eventsToCheck) {
     for (const ghesVersion of Object.keys(event.ghes)) {
+      if (!supportedGhesVersionSet.has(ghesVersion)) continue
       const ghesVersionAllowlists = event.ghes[ghesVersion]._allowlists
       const fullGhesVersion = `ghes-${ghesVersion}`
 

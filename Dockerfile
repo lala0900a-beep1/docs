@@ -1,14 +1,16 @@
 # This Dockerfile is used solely for production deployments to Moda
 # For building this file locally, see src/deployments/production/README.md
-# Environment variables are set in the Moda configuration:
+# Most environment variables are set in the Moda configuration:
 #   config/moda/configuration/*/env.yaml
+# V8 heap sizing is set here via NODE_OPTIONS and mirrored in
+# the Moda config files for defense-in-depth.
 
 # ---------------------------------------------------------------
 # BASE STAGE: Install linux dependencies and set up the node user
 # ---------------------------------------------------------------
 # To update the sha:
 # https://github.com/github/gh-base-image/pkgs/container/gh-base-image%2Fgh-base-noble
-FROM ghcr.io/github/gh-base-image/gh-base-noble:20260128-000359-ga6d0dc7c0@sha256:e2dd6aa64dc4b3fd0fee388a817b2ce0ce239f1da31fd628c359a74832abdfcb AS base
+FROM ghcr.io/github/gh-base-image/gh-base-noble:20260505-222701-gb8f4d82d0@sha256:e5ee5190511450a452713144fb1dcd957535ec7c68705efa48b3d2cbb9871b0d AS base
 
 # Install curl for Node install and determining the early access branch
 # Install git for cloning docs-early-access & translations repos
@@ -112,8 +114,11 @@ RUN npm run warmup-remotejson
 # --------------------------------------
 FROM build AS precompute_stage
 
-# Generate precomputed page info
-RUN npm run precompute-pageinfo -- --max-versions 2
+# Generate precomputed page info. Only English + free-pro-team@latest
+# permalinks are cached; cache misses for older versions and translated
+# pages fall through to runtime compute (which is cheap and Fastly-cached
+# per pathname after the first hit).
+RUN npm run precompute-pageinfo -- --max-versions 1
 
 # -------------------------------------------------
 # PRODUCTION STAGE: What will run on the containers
@@ -150,6 +155,14 @@ COPY --chown=node:node --from=precompute_stage $APP_HOME/.pageinfo-cache.json.br
 # and it then becomes available as an environment variable in the docker run.
 ARG BUILD_SHA
 ENV BUILD_SHA=$BUILD_SHA
+
+# V8 heap limit as a percentage of the container cgroup memory limit.
+# Uses --max-old-space-size-percentage (Node 24+) so the heap adapts
+# automatically when K8s memory limits change. 80% leaves ~20% headroom
+# for off-heap memory (Buffers, V8 code cache, libuv) and OS overhead.
+# Raised from 75% on advice from performance engineering to reduce GC
+# pressure during traffic spikes.
+ENV NODE_OPTIONS="--max-old-space-size-percentage=80"
 
 # Entrypoint to start the server
 CMD ["node_modules/.bin/tsx", "src/frame/server.ts"]

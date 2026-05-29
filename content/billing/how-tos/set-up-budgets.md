@@ -20,15 +20,11 @@ redirect_from:
   - /billing/managing-billing-for-your-products/managing-billing-for-github-packages/managing-your-spending-limit-for-github-packages
   - /billing/managing-your-billing/using-budgets-control-spending
   - /billing/tutorials/set-up-budgets
-topics:
-  - Billing
-  - Enterprise
-  - Organizations
-  - Spending limits
-  - User account
 permissions: '{% data reusables.permissions.enhanced-billing-platform %}'
 shortTitle: Set up budgets
 contentType: how-tos
+category:
+  - Track spending and control costs
 ---
 
 Budgets help you track and control spending on different products. To learn more, see [AUTOTITLE](/billing/concepts/budgets-and-alerts).
@@ -55,7 +51,7 @@ You can set budgets and receive alerts when your usage of a product reaches 75%,
 
    * To limit spending at a Product-level, in "Product-level budget" choose a product from the dropdown, for example: {% data variables.product.prodname_codespaces %}.
    * To limit spending at a SKU-level, in "SKU-level budget" choose a Product and then a SKU, for example: {% data variables.product.prodname_codespaces %} and {% data variables.product.prodname_codespaces %} storage.
-   * To limit spending on premium requests across all features, enable "Bundled premium requests budget" or to limit spending for a specific feature, set a SKU-level budget for the feature (such as {% data variables.product.prodname_copilot_short %} premium requests, {% data variables.product.prodname_spark_short %} premium requests, or {% data variables.copilot.copilot_coding_agent %} premium requests).
+   * To limit spending on premium requests across all features, enable "Bundled premium requests budget" or to limit spending for a specific feature, set a SKU-level budget for the feature (such as {% data variables.product.prodname_copilot_short %} premium requests, {% data variables.product.prodname_spark_short %} premium requests, or {% data variables.copilot.copilot_cloud_agent %} premium requests).
 
 1. Under "Budget scope", set the scope of spending for this budget.
 1. Under "Budget", set a budget amount.
@@ -68,6 +64,15 @@ You can set budgets and receive alerts when your usage of a product reaches 75%,
 {% data reusables.billing.budget-create-button %}
 
 To edit or delete a budget, on the "Budget and alerts" page, click **Edit** or **Delete** next to the budget you want to edit or delete. Follow the prompts.
+
+### Managing included usage alerts for your personal account
+
+{% data variables.product.github %} can send you email notifications when the included usage for your plan reaches 90% and 100% during a billing period. To learn more about what these alerts cover, see [AUTOTITLE](/billing/concepts/budgets-and-alerts#included-usage-alerts).
+
+{% data reusables.user-settings.access_billing_settings_url %}
+
+1. Click **Budgets and alerts**.
+1. Under "Included usage alerts", select or clear **Receive alerts when my included usage reaches 90% and 100%** to opt in or out of email notifications.
 
 ## Managing budgets for your organization or enterprise
 
@@ -101,19 +106,26 @@ As the owner of an enterprise or organization account, or as a billing manager, 
 
    * To limit spending at a Product-level, in "Product-level budget" choose a product from the dropdown, for example: {% data variables.product.prodname_codespaces %}.
    * To limit spending at a SKU-level, in "SKU-level budget" choose a Product and then a SKU, for example: {% data variables.product.prodname_copilot_short %} and {% data variables.product.prodname_copilot_short %} Premium Request.
-To limit spending on premium requests across all features, enable "Bundled premium requests budget" or to limit spending for a specific feature, set a SKU-level budget for the feature (such as {% data variables.product.prodname_copilot_short %} premium requests, {% data variables.product.prodname_spark_short %} premium requests, or {% data variables.copilot.copilot_coding_agent %} premium requests).
+To limit spending on premium requests across all features, enable "Bundled premium requests budget" or to limit spending for a specific feature, set a SKU-level budget for the feature (such as {% data variables.product.prodname_copilot_short %} premium requests, {% data variables.product.prodname_spark_short %} premium requests, or {% data variables.copilot.copilot_cloud_agent %} premium requests).
 1. Under "Budget scope", set the scope of spending for this budget.
-1. Under "Budget", set a budget amount.
+1. Under "Budget", set a budget amount or license count.
 
-   To stop any usage and further spending once the budget limit is reached, select **Stop usage when budget limit is reached**, if available.
+   To stop any usage and further spending once the budget limit is reached, select **Stop usage when budget limit is reached** or **Limit usage when budget limit is reached**, if available. **This option is available for metered products and for {% data variables.product.prodname_AS %} SKU-level budgets**. For {% data variables.product.prodname_AS %}, this option prevents new enablement on additional repositories. It doesn't disable {% data variables.product.prodname_AS %} on repositories where it is already active. See [AUTOTITLE](/billing/concepts/product-billing/github-advanced-security#hard-budgets-for-github-advanced-security-skus).
 
-   >[!IMPORTANT] If you do not select **Stop usage when budget limit is reached**, you will be notified by email if you exceed your budget, but usage **will not** be stopped.
+   >[!IMPORTANT] If you do not select one of these options, you will be notified by email if you exceed your budget, but usage **will not** be stopped.
 
 1. To receive an alert if your budget has reached 75%, 90% and 100% thresholds, select **Receive budget threshold alerts** under "Alerts". When the budget has reached the specific threshold, you will be notified via email and a banner on {% data variables.product.github %}. You may opt out at any time.
 
    Under "Alert Recipients", select the people who will receive the alerts.
 
 {% data reusables.billing.budget-create-button %}
+
+### Managing included usage alerts
+
+{% data variables.product.github %} can send email notifications when the included usage for your account reaches 90% and 100% during a billing period. To learn more about what these alerts cover, see [AUTOTITLE](/billing/concepts/budgets-and-alerts#included-usage-alerts).
+
+1. Navigate to the "Budgets and alerts" view. See [Viewing budgets](#viewing-budgets).
+1. Under "Included usage alerts", select or clear **Receive alerts when my included usage reaches 90% and 100%** to opt in or out of email notifications.
 
 ### Editing or deleting a budget
 
@@ -124,3 +136,4 @@ You can edit or delete a budget at any time, but you cannot change the scope of 
 1. Navigate to the "Budgets and alerts" view. See [Viewing budgets](#viewing-budgets).
 1. In the list of budgets, click {% octicon "kebab-horizontal" aria-label="View actions" %} next to the budget you want to edit, and click **{% octicon "pencil" aria-hidden="true" aria-label="pencil" %} Edit** or **{% octicon "trash" aria-hidden="true" aria-label="trash" %} Delete**.
 1. Follow the prompts.
+
